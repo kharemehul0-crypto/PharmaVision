@@ -9,7 +9,7 @@
 - **Domain:** Automated Optical Inspection (AOI) & Industrial Quality Control
 - **Student Submission:** Flipped Course Project Evaluation
 - **Submission Date:** October 2026
-- **Repository URL:** `https://github.com/{username}/PharmaCount-CV`
+- **Repository URL:** `https://github.com/kharemehul0-crypto/PharmaVision`
 - **Execution Mode:** 100% Terminal / Command-Line Interface (CLI Headless)
 
 ---

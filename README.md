@@ -1,6 +1,6 @@
-# PharmaCount-CV
+# PharmaVision
 
-Automated blister pack and tablet inspection system built with OpenCV and Python for my Computer Vision flipped course project.
+Automated blister pack and tablet inspection system built with OpenCV and Python for my Computer Vision course project.
 
 PharmaCount-CV inspects images of pharmaceutical blister packs on packaging lines. It verifies that all pockets are filled, checks that tablets are intact (not chipped or cracked), and checks that tablet colors match the expected batch without discoloration or foreign pills.
 
