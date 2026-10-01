@@ -17,6 +17,9 @@ def convert_markdown_to_html(md_text: str) -> str:
     text = re.sub(r"^## (.*?)$", r"<h2>\1</h2>", text, flags=re.MULTILINE)
     text = re.sub(r"^# (.*?)$", r"<h1>\1</h1>", text, flags=re.MULTILINE)
 
+    # Images
+    text = re.sub(r'!\[(.*?)\]\((.*?)\)', r'<div style="text-align:center; margin:20px 0;"><img src="\2" alt="\1" style="max-width:100%; border:1px solid #ddd; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.1);"><p style="font-size:0.88em; color:#586069; margin-top:6px;"><em>Figure: \1</em></p></div>', text)
+
     # Bold and italics
     text = re.sub(r"\*\*(.*?)\*\*", r"<strong>\1</strong>", text)
     text = re.sub(r"\*(.*?)\*", r"<em>\1</em>", text)

@@ -189,6 +189,23 @@ The system was evaluated using the built-in benchmark suite across 5 realistic p
 
 Visual inspection overlays are saved to `results/annotated_*.png`, highlighting each pocket status with color-coded bounding boxes and an inspection summary banner.
 
+#### 10.1 Visual Inspection Outputs
+
+![Scenario 1: Compliant Blister Pack Inspection (PASS)](../results/annotated_sample_01_perfect_pack.png)
+*Figure 10.1: Perfect blister pack with 10/10 intact tablets. All pockets are verified green with high circularity and pass the overall batch inspection.*
+
+![Scenario 2: Missing Tablet Detection (REJECT)](../results/annotated_sample_02_missing_tablet.png)
+*Figure 10.2: Missing tablet scenario. Empty cavities #4 and #8 are flagged with red crossed boxes and rejected.*
+
+![Scenario 3: Chipped / Broken Tablet Detection (REJECT)](../results/annotated_sample_03_chipped_tablet.png)
+*Figure 10.3: Tablet #3 suffers a physical corner fracture. The contour analyzer detects low circularity (0.635) and low solidity (0.812), flagging the tablet in orange and rejecting the pack.*
+
+![Scenario 4: Foreign Tablet / Contamination Detection (REJECT)](../results/annotated_sample_04_discolored_tablet.png)
+*Figure 10.4: Tablet #7 exhibits significant color shift (CIE Delta-E = 132.5 > threshold 28.0), flagged with a purple badge as discolored/foreign.*
+
+![Scenario 5: Compound Multi-Defect Pack (REJECT)](../results/annotated_sample_05_multi_defect.png)
+*Figure 10.5: Complex industrial scenario containing simultaneously missing (#2), chipped (#6), and discolored (#9) defects.*
+
 ---
 
 ### Section 11: Testing Approach
