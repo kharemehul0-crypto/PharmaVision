@@ -2,7 +2,7 @@
 
 Automated blister pack and tablet inspection system using OpenCV and Python.
 
-- **Author:** Mehul Khare
+- **Name:** Mehul Khare
 - **Registration Number:** 24BAI10613
 - **Course:** Computer Vision (Flipped Course Project)
 - **Repository:** https://github.com/kharemehul0-crypto/PharmaVision
@@ -51,7 +51,7 @@ I developed **PharmaVision** to automate this inspection using classical compute
    ```bash
    pip install -r requirements.txt
    ```
-   *(Only `opencv-python`, `numpy`, and `matplotlib` are required)*
+   
 
 ---
 
