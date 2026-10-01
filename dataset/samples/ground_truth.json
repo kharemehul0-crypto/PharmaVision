@@ -1,0 +1,82 @@
+{
+  "sample_01_perfect_pack.png": {
+    "name": "Perfect Blister Pack",
+    "expected_status": "PASS",
+    "pockets": {
+      "1": "NORMAL",
+      "2": "NORMAL",
+      "3": "NORMAL",
+      "4": "NORMAL",
+      "5": "NORMAL",
+      "6": "NORMAL",
+      "7": "NORMAL",
+      "8": "NORMAL",
+      "9": "NORMAL",
+      "10": "NORMAL"
+    }
+  },
+  "sample_02_missing_tablet.png": {
+    "name": "Missing Tablets Scenario",
+    "expected_status": "REJECT",
+    "pockets": {
+      "1": "NORMAL",
+      "2": "NORMAL",
+      "3": "NORMAL",
+      "4": "MISSING",
+      "5": "NORMAL",
+      "6": "NORMAL",
+      "7": "NORMAL",
+      "8": "MISSING",
+      "9": "NORMAL",
+      "10": "NORMAL"
+    }
+  },
+  "sample_03_chipped_tablet.png": {
+    "name": "Chipped Tablet Scenario",
+    "expected_status": "REJECT",
+    "pockets": {
+      "1": "NORMAL",
+      "2": "NORMAL",
+      "3": "CHIPPED",
+      "4": "NORMAL",
+      "5": "NORMAL",
+      "6": "NORMAL",
+      "7": "NORMAL",
+      "8": "NORMAL",
+      "9": "NORMAL",
+      "10": "NORMAL"
+    }
+  },
+  "sample_04_discolored_tablet.png": {
+    "name": "Discolored Tablet Scenario",
+    "expected_status": "REJECT",
+    "pockets": {
+      "1": "NORMAL",
+      "2": "NORMAL",
+      "3": "NORMAL",
+      "4": "NORMAL",
+      "5": "NORMAL",
+      "6": "NORMAL",
+      "7": "DISCOLORED",
+      "8": "NORMAL",
+      "9": "NORMAL",
+      "10": "NORMAL"
+    }
+  },
+  "sample_05_multi_defect.png": {
+    "name": "Multi-Defect Compound Scenario",
+    "expected_status": "REJECT",
+    "pockets": {
+      "1": "NORMAL",
+      "2": "MISSING",
+      "3": "NORMAL",
+      "4": "NORMAL",
+      "5": "NORMAL",
+      "6": "CHIPPED",
+      "7": "NORMAL",
+      "8": "NORMAL",
+      "9": "DISCOLORED",
+      "10": "NORMAL"
+    }
+  }
+}
