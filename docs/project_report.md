@@ -6,7 +6,7 @@
 ### Section 1: Cover Page
 - **Course Name:** Computer Vision
 - **Project Title:** PharmaCount-CV: Vision-Based Pharmaceutical Blister Pack & Tablet Integrity Inspector
-- **Domain:** Industrial Automated Optical Inspection (AOI) & Computational Quality Control
+- **Domain:** Automated Optical Inspection (AOI) & Industrial Quality Control
 - **Student Submission:** Flipped Course Project Evaluation
 - **Submission Date:** October 2026
 - **Repository URL:** `https://github.com/{username}/PharmaCount-CV`
@@ -15,42 +15,44 @@
 ---
 
 ### Section 2: Introduction
-In pharmaceutical tablet manufacturing, blister packaging is one of the most critical stages before secondary carton packaging and commercial distribution. Modern blister packaging machines package tablets at rates between 200 and 600 blister cards per minute. At these speeds, packaging anomalies frequently occur:
-1. Feeder vibratory jams leading to unfilled, empty blister cavities.
-2. Mechanical shear stresses, hopper friction, or punch impacts causing broken, cracked, or chipped tablets.
-3. Cross-contamination or chemical discoloration when foreign tablets or contaminated granules enter the blister sealing track.
+In pharmaceutical packaging lines, tablets are placed into formed blister cavities and sealed with aluminum backing foil at high speeds, often producing 200 to 600 packs per minute. During this rapid mechanical process, three issues frequently occur:
+1. Feeder vibratory jams leave empty cavities where pills were never dropped.
+2. Mechanical punch impacts or chute friction cause tablets to crack or chip before sealing.
+3. Cross-batch contamination or degraded granules lead to foreign or discolored tablets entering the foil track.
 
-Manual human inspection of fast-moving conveyor lines is inherently subjective and prone to operator visual fatigue. Even a 0.5% failure to intercept broken or missing tablets can cause non-compliance with drug regulatory standards (such as US FDA 21 CFR and CDSCO guidelines), triggering expensive product batch recalls.
+Human operators inspecting these fast-moving conveyor lines experience visual fatigue within minutes, and subtle edge chips or slight color shifts easily escape manual observation. If a defective blister card reaches a consumer, it risks incorrect patient dosage, potential health complications, and costly product recalls for the manufacturer.
 
-PharmaCount-CV was developed as an automated optical inspection system that uses deterministic computer vision algorithms to evaluate blister card images. Without requiring GPU accelerators or training thousands of deep-learning annotations, PharmaCount-CV combines bilateral edge-preserving filtering, geometric pocket lattice projection, contour moment analysis, and CIE $L^*a^*b^*$ color difference ($\Delta E$) checks to perform high-speed quality grading in under 25 milliseconds per pack on a standard CPU.
+I developed PharmaCount-CV as an automated vision inspection system to solve this problem. Instead of relying on expensive proprietary sensors or heavy deep learning models requiring GPU servers, PharmaCount-CV uses classical computer vision algorithms (bilateral filtering, adaptive thresholding, contour moments, and CIE L*a*b* color distance) to inspect blister cards on standard CPU hardware in roughly 20 milliseconds per pack.
 
 ---
 
 ### Section 3: Problem Statement
-To design, implement, and validate an automated, non-contact computer vision system that inspects pharmaceutical blister cards from digital photographs. The system must:
-- Detect and count the total number of blister cavities and present tablets.
-- Identify missing tablets (unfilled pockets) with 100% recall.
-- Detect broken, chipped, or geometrically deformed tablets through sub-pixel contour shape descriptors (circularity and convex hull solidity).
-- Detect foreign tablet contamination and chemical discoloration through perceptual color distance analysis.
-- Provide a modular, headless command-line interface suitable for automated CI/CD and factory packaging pipelines without requiring a graphical desktop environment.
+The objective of this project is to build an automated, non-contact computer vision system that inspects pharmaceutical blister cards from digital images. The system must:
+- Detect the blister card in the frame and locate all individual pocket cavities.
+- Count the total number of pockets and confirm whether each contains an intact tablet.
+- Flag missing tablets with 100% recall.
+- Detect broken or chipped tablets by measuring sub-pixel contour properties like circularity and convex hull solidity.
+- Detect foreign tablets and chemical degradation using perceptual color distance checks.
+- Run completely through a command-line interface without requiring a desktop GUI, returning standard shell exit codes suitable for automated manufacturing scripts.
 
 ---
 
 ### Section 4: Functional Requirements
-1. **Automated Image Ingestion & Conditioning:** The system must accept single images or batch directories in standard formats (PNG, JPG, BMP) and perform adaptive contrast normalization to eliminate specular foil reflections.
-2. **Blister Grid Localization & Pocket Extraction:** The system must identify the outer boundary of the blister card and slice the active pack area into an $R \times C$ lattice of individual pocket Regions of Interest (ROIs).
-3. **Sub-Pixel Contour & Shape Feature Extraction:** For each pocket cavity, the system must extract candidate tablet contours and calculate area, perimeter, isoperimetric circularity quotient, and convex hull solidity.
-4. **Perceptual Colorimetric Verification:** The system must sample tablet pixel regions and calculate Euclidean distance ($\Delta E$) in CIE $L^*a^*b^*$ color space relative to a reference golden tablet color.
-5. **Multi-Criteria Defect Classification:** The system must classify each pocket as `NORMAL`, `MISSING`, `CHIPPED`, or `DISCOLORED`, and output an overall batch verdict (`PASS` or `REJECT`).
-6. **Production Reporting & Audit Logging:** The system must render visual diagnostic HUD overlays, generate machine-readable JSON logs for each pack, and append row entries into an audit CSV file.
+The inspection pipeline provides six main capabilities:
+1. **Image Ingestion & Preprocessing:** Reads single images or full directories (PNG, JPG, BMP) and suppresses specular reflections from shiny aluminum foil using bilateral filtering and CLAHE.
+2. **Card Localization & Pocket Slicing:** Finds the outer edges of the blister pack, removes packaging border margins, and slices the active pack area into an R x C grid of pocket regions.
+3. **Contour & Shape Feature Extraction:** Segments each candidate tablet and calculates area, perimeter, isoperimetric circularity quotient ($4\pi A / P^2$), and convex hull solidity ($A / A_{\text{hull}}$).
+4. **Color Consistency Verification:** Samples pixels inside the tablet contour, converts them to CIE L*a*b* color space, and calculates Euclidean Delta-E against the reference tablet color.
+5. **Multi-Criteria Defect Classification:** Evaluates each pocket independently to classify it as `NORMAL`, `MISSING`, `CHIPPED`, or `DISCOLORED`, and assigns an overall `PASS` or `REJECT` verdict to the pack.
+6. **Reporting & Audit Logging:** Renders visual HUD overlays on the image, prints an ASCII diagnostic table to the terminal, writes a machine-readable JSON log, and appends a row to a batch CSV audit trail.
 
 ---
 
 ### Section 5: Non-Functional Requirements
-1. **Execution Latency & Performance:** Processing latency must stay below 50 milliseconds per blister pack on standard CPU hardware to support high-speed continuous packaging lines.
-2. **Reliability & Defect Recall:** The defect detection recall for missing tablets and critical fractures must achieve 100% on the benchmark test suite to ensure zero defective packs escape undetected.
-3. **Headless Usability & CLI Ergonomics:** The application must run without GUI display servers, returning standard exit codes (0 for PASS, 1 for REJECT, 2 for syntax/input error) for easy integration into automated shell scripts.
-4. **Maintainability & Modularity:** Code must be split into dedicated single-responsibility modules (preprocessor, grid detector, contour analyzer, color inspector, classifier, visualizer, reporter) adhering to PEP 8 standards with zero circular dependencies.
+1. **Latency:** The complete inspection pipeline must process a standard 10-tablet pack in under 50 ms on CPU so it can keep up with high-speed packaging lines.
+2. **Recall:** Defect detection recall on the benchmark test set must reach 100% so that no defective pack passes through as compliant.
+3. **CLI Usability:** The program must execute headlessly in terminal environments without opening GUI windows, using exit code 0 for PASS and 1 for REJECT.
+4. **Code Modularity:** The implementation must be structured across clean, focused Python modules adhering to PEP 8 standards with zero circular dependencies.
 
 ---
 
@@ -71,75 +73,76 @@ PharmaCount-CV uses a sequential pipeline architecture divided into five discret
 ### Section 7: Design Diagrams
 
 #### 7.1 Use Case Diagram
-- **QA Line Operator:** Triggers batch or single image inspection from the terminal; configures tolerance thresholds via `config.json`.
-- **Packaging Pipeline / CI Automation:** Invokes `main.py` via shell script, monitors process exit codes, and ingests `report_*.json` output.
-- **Quality Compliance Officer:** Audits timestamped CSV production logs (`batch_inspection_log.csv`) and reviews annotated visual outputs.
+The primary actors and system interactions:
+- **QA Line Operator:** Runs single or batch image inspections from the terminal and adjusts detection tolerances in `config.json`.
+- **Packaging Pipeline / CI Automation:** Calls `main.py` via shell script, checks the exit code, and reads `report_*.json` for automated sorting.
+- **Compliance Officer:** Audits timestamped CSV production logs (`batch_inspection_log.csv`) and reviews annotated visual outputs.
 
 #### 7.2 Process Flow / Workflow Diagram
-1. Script receives CLI arguments (`--input`, `--output-dir`, `--config`, etc.).
-2. Ingest image and apply bilateral filtering ($d=9, \sigma_{\text{color}}=75, \sigma_{\text{space}}=75$).
-3. Segment blister card boundary using thresholding and morphological bounding.
-4. Partition the card into active grid pockets based on row/column parameters.
-5. In each pocket, apply Otsu segmentation and morphological opening with an elliptical structuring element.
-6. Check if contour is present. If contour area $< 20\%$ baseline, flag `MISSING`.
-7. If present, measure circularity ($4\pi A / P^2$) and solidity ($A / A_{\text{hull}}$). If below thresholds, flag `CHIPPED`.
-8. Sample inner tablet mask, convert to CIE $L^*a^*b^*$, and calculate Euclidean $\Delta E$. If $\Delta E > 28.0$, flag `DISCOLORED`.
-9. If all pockets are `NORMAL`, set pack status to `PASS`; otherwise set `REJECT`.
-10. Render visual HUD banner and save outputs.
+1. The script receives CLI arguments (`--input`, `--output-dir`, `--config`, etc.).
+2. The image is loaded and filtered using bilateral denoising ($d=9, \sigma_{\text{color}}=75, \sigma_{\text{space}}=75$).
+3. The blister card boundary is segmented using edge closing, and margins are trimmed.
+4. The active card area is subdivided into an $R \times C$ grid of pocket bounding boxes.
+5. For each pocket cell, the tablet contour is segmented using Otsu thresholding and morphological opening with an elliptical kernel.
+6. If no contour is found or contour area $< 20\%$ baseline, the pocket is marked `MISSING`.
+7. If a contour is present, circularity and solidity are calculated. If below thresholds, the tablet is marked `CHIPPED`.
+8. Tablet color is sampled inside an eroded contour mask, converted to CIE L*a*b*, and compared to the reference tablet. If $\Delta E > 28.0$, it is marked `DISCOLORED`.
+9. If all pockets are `NORMAL`, the pack is marked `PASS`; if any pocket has a defect, the pack is marked `REJECT`.
+10. The visual HUD banner and bounding boxes are rendered, and JSON, CSV, and terminal outputs are produced.
 
 #### 7.3 UML Class Diagram
-- `PackConfig`: Dataclass holding grid counts, filtering coefficients, and geometric tolerances.
-- `ImagePreprocessor`: Manages image loading, bilateral filtering, CLAHE, and color space transformations.
-- `BlisterGridDetector`: Computes card boundaries and returns coordinates for each pocket.
-- `TabletContourAnalyzer`: Computes mathematical descriptors (area, perimeter, circularity, solidity).
-- `TabletColorInspector`: Extracts masked tablet color and calculates CIE $L^*a^*b^*$ $\Delta E$.
-- `TabletDefectClassifier`: Coordinates extraction and assigns pocket statuses.
-- `InspectionVisualizer`: Renders color-coded pocket borders, labels, and header HUD banners.
-- `ReportEngine`: Handles terminal summaries, JSON serialization, and CSV logging.
+- `PackConfig`: Dataclass holding grid layout, filtering parameters, and detection thresholds.
+- `ImagePreprocessor`: Manages image loading, bilateral filtering, CLAHE, and color space conversions.
+- `BlisterGridDetector`: Detects the card boundary and generates individual pocket bounding boxes.
+- `TabletContourAnalyzer`: Segments tablet contours and computes area, perimeter, circularity, and solidity.
+- `TabletColorInspector`: Samples masked tablet colors and computes CIE L*a*b* Delta-E.
+- `TabletDefectClassifier`: Coordinates the analysis steps and assigns status to each pocket and the overall pack.
+- `InspectionVisualizer`: Renders color-coded pocket bounding boxes, labels, and the summary HUD banner.
+- `ReportEngine`: Formats the ASCII terminal table, writes JSON reports, and appends to CSV files.
 
 #### 7.4 UML Sequence Diagram
-The sequence diagram details the function call progression from CLI invocation in `main.py` to `inspect_pack()`, contour analysis, color sampling, and file export. Complete diagram specifications are documented in `docs/diagrams.md`.
+The sequential function call progression starts at CLI invocation in `main.py`, passes through `inspect_pack()`, pocket segmentation, contour analysis, color sampling, and ends with report generation. Complete diagram specifications are documented in `docs/diagrams.md`.
 
 #### 7.5 Database & Storage Schema
-Inspection results are persisted to:
-- `results/batch_inspection_log.csv`: Relational audit table containing timestamp, image name, overall status, total pockets, tablets present, fill rate %, defect counts, and latency.
-- `results/report_<image_name>.json`: Hierarchical JSON records containing per-pocket coordinates, area, circularity, solidity, $\Delta E$, and specific defect reasons.
+Inspection records are stored in two complementary formats:
+- `results/batch_inspection_log.csv`: A flat table recording timestamp, image name, overall status, total pockets, tablets present, fill rate %, defect counts, and latency.
+- `results/report_<image_name>.json`: Detailed records containing individual pocket coordinates, area, circularity, solidity, Delta-E, and defect descriptions.
 
 ---
 
 ### Section 8: Design Decisions & Rationale
 
-#### Classical Computer Vision vs. Deep Learning (CNN/YOLO)
-A deliberate architectural decision was made to use classical computer vision (morphological contour analysis and colorimetry) rather than an object detection model like YOLO or Faster R-CNN.
-1. **Data Efficiency:** Training a neural network to detect subtle tablet edge fractures requires thousands of annotated industrial images covering every defect variant. In a pharmaceutical setting, producing thousands of broken tablet samples is expensive and impractical.
-2. **Deterministic Verification:** Regulatory agencies require explainable inspection rules. With contour circularity ($C = 4\pi A / P^2$) and solidity ($S = A / A_{\text{hull}}$), rejection reasons are mathematically verifiable rather than black-box probability scores.
-3. **Execution Speed on CPU:** Deep learning inference models typically require dedicated GPUs to run at real-time speeds, whereas our OpenCV pipeline executes in under 20 ms on standard commodity CPUs without GPU overhead.
+#### Why Classical Computer Vision Instead of Deep Learning (YOLO/CNN)?
+I chose classical computer vision algorithms over a deep learning model for three practical engineering reasons:
+1. **Training Data Availability:** Training an object detector like YOLOv8 on tablet defects requires thousands of hand-annotated images showing every conceivable chip, fracture, and lighting variation. In practice, pharmaceutical factories cannot easily produce thousands of broken pill samples just to train a network.
+2. **Explainability and Deterministic Rules:** Pharmaceutical quality control falls under strict regulatory oversight (like FDA 21 CFR). When a blister card is rejected, quality managers need to know the exact mathematical reason—for example, "Pocket 3 solidity dropped to 0.889 due to an edge chip." A deep learning network outputting an opaque probability score does not provide this clarity.
+3. **Speed on Commodity Hardware:** Deep learning inference typically requires a GPU to reach real-time frame rates. By using OpenCV contours and NumPy vectorization, my pipeline runs in under 24 ms on a standard laptop CPU without any specialized hardware.
 
-#### Color Space Selection: CIE $L^*a^*b^*$ vs. RGB
-While RGB values are standard for image capture, Euclidean distances in RGB space do not match human perception of color differences. The CIE $L^*a^*b^*$ color space was selected because its dimensions ($L^*$ for lightness, $a^*$ for green-red, and $b^*$ for blue-yellow) are perceptually uniform. The Euclidean distance $\Delta E = \sqrt{(\Delta L)^2 + (\Delta a)^2 + (\Delta b)^2}$ provides a reliable metric for spotting foreign tablets or chemical discoloration.
+#### Color Space Choice: CIE L*a*b* vs. Standard RGB
+While digital cameras output RGB images, RGB color space is not perceptually uniform—an identical numerical shift in green values looks much more dramatic to the human eye than the same shift in blue values. I converted tablet ROIs to the CIE L*a*b* color space because Euclidean distance in L*a*b* (Delta-E) closely mirrors human color perception. This makes it straightforward to set an intuitive threshold for spotting foreign tablets or chemical degradation.
 
-#### Handling Foil Glare and Specular Reflection
-Metallic aluminum blister foil exhibits strong specular highlights and micro-texture grains that can mislead standard Canny edge detectors. To resolve this:
-- We applied bilateral filtering before edge detection. Unlike Gaussian blurring which blurs both noise and edges, bilateral filtering weights pixels by both spatial proximity and radiometric similarity, preserving sharp tablet rim boundaries while flattening foil noise.
-- We used morphological opening with an elliptical structuring element ($5 \times 5$) to eliminate small reflective noise flecks inside empty pocket cavities.
+#### Mitigating Aluminum Foil Specular Glare
+The shiny silver foil used in blister packs reflects overhead factory lights, producing bright specular highlights that standard Canny edge detectors mistake for tablet boundaries. I addressed this with two techniques:
+- Bilateral filtering: Rather than using a simple Gaussian blur that blurs edges together with noise, bilateral filtering smooths out the foil grain while preserving the sharp outer rim of the tablet.
+- Morphological opening with an elliptical kernel: Applying an elliptical opening operation detaches thin foil reflection streaks from the actual tablet body.
 
 ---
 
 ### Section 9: Implementation Details
-The project is organized into modular Python files:
-- **`pharmacount/config.py`:** Uses Python dataclasses for configuration parameters and structured return types.
-- **`pharmacount/preprocessor.py`:** Loads BGR images, performs bilateral filtering via `cv2.bilateralFilter()`, and initializes CLAHE using `cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))`.
-- **`pharmacount/grid_detector.py`:** Applies Canny edge detection and morphological closing to detect the blister card boundary. It then divides the active area into an $R \times C$ array of pocket coordinates with internal margins.
-- **`pharmacount/contour_analyzer.py`:** Uses median blurring and Otsu's thresholding to isolate candidate contours. It evaluates contour moments to compute centroid offset, area via `cv2.contourArea()`, arc length via `cv2.arcLength()`, and convex hull via `cv2.convexHull()`.
-- **`pharmacount/color_inspector.py`:** Converts pocket ROIs to CIE $L^*a^*b^*$ and computes $\Delta E$ using vectorized NumPy array slicing under an eroded tablet mask.
-- **`pharmacount/defect_classifier.py`:** Evaluates area ratios against the median tablet area of the pack, checking shape and color thresholds to flag defects.
-- **`pharmacount/visualizer.py`:** Draws color-coded rectangles and HUD banners with OpenCV drawing primitives.
-- **`pharmacount/report_engine.py`:** Serializes structured dictionaries into JSON and appends inspection rows to CSV files.
+The project is organized into clean, single-responsibility Python files:
+- **`pharmacount/config.py`:** Stores default parameters in Python dataclasses so grid dimensions and thresholds can be configured easily.
+- **`pharmacount/preprocessor.py`:** Uses `cv2.bilateralFilter()` to smooth foil texture and `cv2.createCLAHE()` to balance lighting across the card.
+- **`pharmacount/grid_detector.py`:** Finds the largest rectangular card contour and computes pocket bounding boxes by dividing the active area by the expected rows and columns.
+- **`pharmacount/contour_analyzer.py`:** Uses Otsu thresholding on pocket sub-images, finds the main central contour, and calculates circularity ($4\pi A / P^2$) and convex hull solidity ($A / A_{\text{hull}}$).
+- **`pharmacount/color_inspector.py`:** Erodes the tablet contour mask by 2 pixels to avoid sampling the metallic pocket rim, then computes mean L*a*b* and Delta-E against the reference tablet.
+- **`pharmacount/defect_classifier.py`:** Compares each pocket's measurements against the median tablet area and shape thresholds, assigning the final pocket status.
+- **`pharmacount/visualizer.py`:** Draws color-coded bounding boxes on the original image (green for normal, red for missing, orange for chipped, purple for discolored) and attaches a summary HUD banner.
+- **`pharmacount/report_engine.py`:** Formats clean ASCII terminal tables and writes JSON and CSV logs.
 
 ---
 
 ### Section 10: Screenshots & Benchmark Results
-The system was evaluated using the built-in benchmark suite across 5 realistic packaging scenarios:
+I tested the pipeline using the built-in benchmark suite across 5 realistic packaging scenarios:
 
 | Test Scenario File | Expected Status | Predicted Status | Pocket Acc (%) | Defect Recall (%) | Latency (ms) |
 |:---|:---:|:---:|:---:|:---:|:---:|
@@ -149,16 +152,14 @@ The system was evaluated using the built-in benchmark suite across 5 realistic p
 | `sample_04_discolored_tablet.png`| REJECT | REJECT | 100.0% | 100.0% | 19.8 ms |
 | `sample_05_multi_defect.png` | REJECT | REJECT | 100.0% | 100.0% | 21.0 ms |
 
-#### Overall Benchmark Summary Metrics
-- **Total Blister Packs Tested:** 5
-- **Total Pockets Evaluated:** 50
-- **Pocket Classification Accuracy:** 100.00%
-- **Defect Detection Precision:** 100.00%
-- **Defect Detection Recall:** 100.00%
-- **F1-Score:** 100.00%
-- **Average Processing Latency:** 19.7 ms per pack (~50 frames per second on CPU)
-
-Visual inspection overlays are saved to `results/annotated_*.png`, highlighting each pocket status with color-coded bounding boxes and an inspection summary banner.
+#### Overall Benchmark Summary
+- Total Blister Packs Tested: 5
+- Total Pockets Evaluated: 50
+- Pocket Classification Accuracy: 100.00%
+- Defect Detection Precision: 100.00%
+- Defect Detection Recall: 100.00%
+- F1-Score: 100.00%
+- Average Processing Latency: 19.7 ms per pack (~50 FPS on CPU)
 
 #### 10.1 Terminal Execution & Benchmark CLI Output
 
@@ -185,37 +186,37 @@ Visual inspection overlays are saved to `results/annotated_*.png`, highlighting 
 ---
 
 ### Section 11: Testing Approach
-Quality assurance for the codebase was verified through two testing layers:
-1. **Automated Unit Testing (`unittest`):**
-   - `test_preprocessor.py`: Tests that bilateral filtering preserves array shapes and validates color conversions.
-   - `test_grid_detector.py`: Tests that pocket extraction creates non-overlapping bounding boxes within image limits.
-   - `test_contour_analyzer.py`: Validates circularity and solidity calculations on known geometric shapes (circles and polygons).
-   - `test_defect_classifier.py`: Validates detection logic for perfect, missing, chipped, and discolored packs.
-   - `test_cli_pipeline.py`: Validates subprocess execution of `main.py` CLI flags and exit codes.
-   - **Result:** 13 out of 13 unit tests passed in 1.52 seconds.
-2. **Benchmark Evaluation (`--benchmark`):**
-   - Automatically compares pipeline predictions against ground truth labels in `dataset/samples/ground_truth.json`.
+I tested the system through two complementary methods:
+1. **Automated Unit Tests (`unittest`):**
+   - `test_preprocessor.py`: Verifies that bilateral filtering preserves image dimensions and validates color conversions.
+   - `test_grid_detector.py`: Confirms that pocket bounding boxes are non-overlapping and stay inside image bounds.
+   - `test_contour_analyzer.py`: Checks circularity and solidity calculations on synthetic geometric test shapes.
+   - `test_defect_classifier.py`: Tests the decision logic on perfect, missing, chipped, and discolored blister packs.
+   - `test_cli_pipeline.py`: Runs `main.py` via Python subprocess to verify CLI arguments and exit codes.
+   - All 13 unit tests pass in roughly 1.5 seconds.
+2. **Automated Benchmark Suite (`--benchmark`):**
+   - Evaluates all 50 pockets across 5 test packs against `dataset/samples/ground_truth.json`, measuring precision, recall, and F1-score automatically.
 
 ---
 
 ### Section 12: Challenges Faced
-1. **Differentiating Empty Pocket Foil Depressions from Tablets:** In early tests, empty cavities produced large circular foil contours that were misclassified as discolored tablets rather than missing ones. We resolved this by analyzing the mean grayscale intensity within the contour: empty metallic cavities exhibit mean intensities below 140, whereas solid tablets exceed 210.
-2. **Foil Reflection Interference along Card Edges:** High-contrast reflections near blister card margins occasionally distorted grid calculations. We solved this by adding configurable margin parameters (`margin_x_ratio = 0.05`) to crop out packaging borders before grid partitioning.
-3. **Cross-Platform CLI Character Encoding:** Non-ASCII symbols (such as checkmarks) triggered encoding errors on Windows terminals using code page 1252. We updated all terminal outputs to use ASCII tokens (`[PASS]`, `[REJECT]`, `[YES]`, `[NO]`) to guarantee smooth headless execution across all operating systems.
+1. **Empty Foil Cavities Misidentified as Tablets:** During initial testing, empty blister pockets created circular shadow contours on the metallic foil that Otsu thresholding grouped as tablets, causing empty pockets to be misclassified as discolored pills rather than missing ones. I resolved this by inspecting the mean pixel intensity inside candidate contours: empty foil cavities have a mean grayscale value below 140, whereas solid tablets exceed 210.
+2. **Specular Reflections at Card Margins:** Strong reflections along the outer aluminum card edge distorted initial bounding box calculations. I fixed this by adding configurable margin parameters (`margin_x_ratio = 0.05`) to trim packaging edges before projecting the pocket grid.
+3. **Cross-Platform Terminal Encoding:** Using Unicode checkmarks and cross symbols caused encoding crashes on Windows command prompt (cp1252). I replaced all console symbols with plain ASCII tokens (`[PASS]`, `[REJECT]`, `[YES]`, `[NO]`), ensuring reliable headless execution on any terminal.
 
 ---
 
 ### Section 13: Learnings & Key Takeaways
-- Classical computer vision methods remain practical, explainable, and fast for structured manufacturing inspection tasks where physical geometry is constrained.
-- Color consistency checks require perceptual color spaces like CIE $L^*a^*b^*$ rather than raw RGB channels to handle varying lighting conditions reliably.
-- Building CLI-first architectures with clean exit codes and structured JSON/CSV logging makes computer vision tools much easier to integrate into automated factory workflows.
+- For structured industrial quality control where geometry is predictable, classical computer vision methods are often much faster, easier to debug, and more explainable than deep learning.
+- Perceptual color spaces like CIE L*a*b* are far more reliable than raw RGB for color deviation checks under varying lighting conditions.
+- Designing a CLI-first architecture with clear exit codes makes it much easier to integrate vision tools into automated production scripts and test pipelines.
 
 ---
 
 ### Section 14: Future Enhancements
-1. **Sub-Pocket Blister Foil Seal Verification:** Implementing texture analysis (via Gray-Level Co-occurrence Matrix or Gabor filters) to detect micro-cracks and seal leaks in the transparent foil cover.
-2. **Perspective Homography Rectification:** Adding automated 4-point homography transformations using corner fiducial markers to correct for tilted blister cards.
-3. **Hardware Trigger Integration:** Integrating GPIO/Modbus triggers to connect directly with industrial PLC reject diverter arms on physical conveyor lines.
+1. **Foil Seal Crack Detection:** Adding texture analysis (using Gray-Level Co-occurrence Matrix or Gabor filters) to check the transparent foil surface for micro-cracks or pinholes.
+2. **Perspective Homography Correction:** Adding automated corner marker detection to deskew blister cards that enter the camera frame tilted.
+3. **Direct PLC Integration:** Connecting the inspection software with industrial Modbus or GPIO triggers to control physical reject diverter arms on a real packaging conveyor.
 
 ---
 

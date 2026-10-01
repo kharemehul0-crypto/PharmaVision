@@ -1,0 +1,266 @@
+{
+  "image_name": "sample_03_chipped_tablet.png",
+  "overall_status": "REJECT",
+  "summary": {
+    "total_pockets": 10,
+    "tablets_present": 10,
+    "fill_rate_percent": 100.0,
+    "total_defects": 1,
+    "missing_count": 0,
+    "chipped_count": 1,
+    "discolored_count": 0,
+    "processing_time_ms": 14.97
+  },
+  "pockets": [
+    {
+      "index": 1,
+      "grid_position": {
+        "row": 1,
+        "col": 1
+      },
+      "bounding_box": {
+        "x": 61,
+        "y": 44,
+        "w": 101,
+        "h": 116
+      },
+      "status": "NORMAL",
+      "area_px": 3114.0,
+      "perimeter_px": 208.17,
+      "circularity": 0.903,
+      "solidity": 0.9886,
+      "color_delta_e": 13.36,
+      "mean_bgr": [
+        219.2,
+        219.2,
+        221.0
+      ],
+      "defect_reason": "Compliant"
+    },
+    {
+      "index": 2,
+      "grid_position": {
+        "row": 1,
+        "col": 2
+      },
+      "bounding_box": {
+        "x": 180,
+        "y": 44,
+        "w": 101,
+        "h": 116
+      },
+      "status": "NORMAL",
+      "area_px": 3114.0,
+      "perimeter_px": 208.17,
+      "circularity": 0.903,
+      "solidity": 0.9886,
+      "color_delta_e": 13.36,
+      "mean_bgr": [
+        219.2,
+        219.2,
+        221.0
+      ],
+      "defect_reason": "Compliant"
+    },
+    {
+      "index": 3,
+      "grid_position": {
+        "row": 1,
+        "col": 3
+      },
+      "bounding_box": {
+        "x": 299,
+        "y": 44,
+        "w": 102,
+        "h": 116
+      },
+      "status": "CHIPPED",
+      "area_px": 2703.0,
+      "perimeter_px": 239.14,
+      "circularity": 0.594,
+      "solidity": 0.8886,
+      "color_delta_e": 30.95,
+      "mean_bgr": [
+        200.1,
+        200.1,
+        201.8
+      ],
+      "defect_reason": "Low circularity (0.59); Low solidity (0.89)"
+    },
+    {
+      "index": 4,
+      "grid_position": {
+        "row": 1,
+        "col": 4
+      },
+      "bounding_box": {
+        "x": 419,
+        "y": 44,
+        "w": 101,
+        "h": 116
+      },
+      "status": "NORMAL",
+      "area_px": 3114.0,
+      "perimeter_px": 208.17,
+      "circularity": 0.903,
+      "solidity": 0.9886,
+      "color_delta_e": 13.36,
+      "mean_bgr": [
+        219.2,
+        219.2,
+        221.0
+      ],
+      "defect_reason": "Compliant"
+    },
+    {
+      "index": 5,
+      "grid_position": {
+        "row": 1,
+        "col": 5
+      },
+      "bounding_box": {
+        "x": 538,
+        "y": 44,
+        "w": 102,
+        "h": 116
+      },
+      "status": "NORMAL",
+      "area_px": 3114.0,
+      "perimeter_px": 208.17,
+      "circularity": 0.903,
+      "solidity": 0.9886,
+      "color_delta_e": 13.36,
+      "mean_bgr": [
+        219.2,
+        219.2,
+        221.0
+      ],
+      "defect_reason": "Compliant"
+    },
+    {
+      "index": 6,
+      "grid_position": {
+        "row": 2,
+        "col": 1
+      },
+      "bounding_box": {
+        "x": 61,
+        "y": 180,
+        "w": 101,
+        "h": 117
+      },
+      "status": "NORMAL",
+      "area_px": 3114.0,
+      "perimeter_px": 208.17,
+      "circularity": 0.903,
+      "solidity": 0.9886,
+      "color_delta_e": 13.36,
+      "mean_bgr": [
+        219.2,
+        219.2,
+        221.0
+      ],
+      "defect_reason": "Compliant"
+    },
+    {
+      "index": 7,
+      "grid_position": {
+        "row": 2,
+        "col": 2
+      },
+      "bounding_box": {
+        "x": 180,
+        "y": 180,
+        "w": 101,
+        "h": 117
+      },
+      "status": "NORMAL",
+      "area_px": 3114.0,
+      "perimeter_px": 208.17,
+      "circularity": 0.903,
+      "solidity": 0.9886,
+      "color_delta_e": 13.36,
+      "mean_bgr": [
+        219.2,
+        219.2,
+        221.0
+      ],
+      "defect_reason": "Compliant"
+    },
+    {
+      "index": 8,
+      "grid_position": {
+        "row": 2,
+        "col": 3
+      },
+      "bounding_box": {
+        "x": 299,
+        "y": 180,
+        "w": 102,
+        "h": 117
+      },
+      "status": "NORMAL",
+      "area_px": 3114.0,
+      "perimeter_px": 208.17,
+      "circularity": 0.903,
+      "solidity": 0.9886,
+      "color_delta_e": 13.36,
+      "mean_bgr": [
+        219.2,
+        219.2,
+        221.0
+      ],
+      "defect_reason": "Compliant"
+    },
+    {
+      "index": 9,
+      "grid_position": {
+        "row": 2,
+        "col": 4
+      },
+      "bounding_box": {
+        "x": 419,
+        "y": 180,
+        "w": 101,
+        "h": 117
+      },
+      "status": "NORMAL",
+      "area_px": 3114.0,
+      "perimeter_px": 208.17,
+      "circularity": 0.903,
+      "solidity": 0.9886,
+      "color_delta_e": 13.36,
+      "mean_bgr": [
+        219.2,
+        219.2,
+        221.0
+      ],
+      "defect_reason": "Compliant"
+    },
+    {
+      "index": 10,
+      "grid_position": {
+        "row": 2,
+        "col": 5
+      },
+      "bounding_box": {
+        "x": 538,
+        "y": 180,
+        "w": 102,
+        "h": 117
+      },
+      "status": "NORMAL",
+      "area_px": 3114.0,
+      "perimeter_px": 208.17,
+      "circularity": 0.903,
+      "solidity": 0.9886,
+      "color_delta_e": 13.36,
+      "mean_bgr": [
+        219.2,
+        219.2,
+        221.0
+      ],
+      "defect_reason": "Compliant"
+    }
+  ]
+}

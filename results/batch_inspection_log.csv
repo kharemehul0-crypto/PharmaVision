@@ -1,0 +1,3 @@
+Image Name,Overall Status,Total Pockets,Tablets Present,Fill Rate (%),Total Defects,Missing Count,Chipped Count,Discolored Count,Processing Time (ms)
+sample_03_chipped_tablet.png,REJECT,10,10,100.0,1,0,1,0,23.69
+sample_03_chipped_tablet.png,REJECT,10,10,100.0,1,0,1,0,14.97

@@ -1,35 +1,35 @@
 # Project Statement: PharmaCount-CV
 
 ## 1. Problem Statement
-In high-speed pharmaceutical packaging lines, blister cards are filled and sealed at rates exceeding 200–500 packs per minute. During this packaging process, mechanical feeder failures, tablet breakage, tool wear, and cross-batch contamination can lead to:
-- Empty blister pockets (missing tablets),
-- Chipped, broken, or fragmented tablets,
-- Foreign tablets or chemical discoloration.
+In pharmaceutical manufacturing, blister cards are filled with tablets and sealed at very high speeds, often several hundred packs every minute. Because the machinery runs so fast, a few common defects happen regularly:
+- Pockets get skipped, leaving empty cavities with missing pills.
+- Tablets get cracked or chipped by feed chutes or mechanical vibrations before sealing.
+- Foreign tablets or discolored pills from previous batches get mixed into the packaging line.
 
-Manual visual inspection by human operators is error-prone due to visual fatigue, subjective judgement, and the inability to keep pace with modern packaging lines. A single defective blister pack reaching the consumer can lead to inaccurate dosage, product recalls, regulatory penalties from agencies like the FDA/CDSCO, and severe patient health risks. 
+Human operators inspecting these conveyor lines get tired quickly and cannot catch micro-defects at production speed. If a blister pack with missing or broken medication reaches a patient, it can cause incorrect dosages or serious health complications, along with costly recalls for the pharmaceutical company.
 
-PharmaCount-CV provides a vision-based automated inspection system capable of checking tablet presence, shape integrity, and color consistency in blister packs from digital imagery without human intervention.
+I built PharmaCount-CV to automate this inspection process using computer vision. The system analyzes photos of blister cards, counts the tablets, checks their physical shape for cracks or chips, and flags any discolored or foreign pills before the pack leaves the packaging area.
 
 ## 2. Scope of the Project
-The scope of this project includes:
-- Automated localization of blister packs and geometric partitioning of the card into individual pocket cells ($R \times C$ layout).
-- Robust image preprocessing to suppress specular reflections and foil glare using bilateral filtering and CLAHE.
-- Quantitative geometric contour analysis of each tablet (area, perimeter, circularity/roundness, and convex hull solidity) to detect missing or broken/chipped pills.
-- Colorimetric verification in perceptual CIE $L^*a^*b^*$ color space using Euclidean $\Delta E$ to identify discolored or foreign tablets.
-- Production-ready output generation: real-time visual HUD overlays with color-coded pocket annotations, machine-readable JSON reports, and CSV production audit logs.
-- Fully automated command-line execution (CLI) supporting single-image inspection, batch folder processing, and a built-in benchmark evaluation suite.
+This project covers the image processing and defect detection pipeline for blister pack quality control:
+- Automatically finding the blister card in an image and slicing it into an R x C grid of pocket regions.
+- Filtering out reflections and glare caused by the shiny aluminum foil using bilateral filtering and CLAHE.
+- Calculating geometric metrics (area, circularity, and convex hull solidity) to spot missing or broken tablets.
+- Checking tablet colors in CIE L*a*b* color space to detect discoloration or foreign pills.
+- Exporting inspection results as visual annotated images (with color-coded boxes and HUD banners), machine-readable JSON logs, and CSV audit files.
+- Running entirely through the command line (CLI) so it can run headlessly on any machine or server without needing a desktop GUI.
 
-*Out of Scope:* Physical hardware conveyor control (PLC integration) and blister pocket de-blistering mechanical arms, which are hardware integrations beyond image processing.
+What is out of scope: Direct hardware control for physical reject kickers (PLCs) and mechanical sorters. This project focuses entirely on the vision and software classification system.
 
 ## 3. Target Users
-- **Pharmaceutical Packaging Engineers & QA Inspectors:** To automate quality control checks at the sealing and cartoning stage.
-- **Regulatory Compliance & Audit Officers:** To maintain automated, timestamped digital logs of batch defect rates and fill percentages.
-- **Contract Packaging Organizations (CPOs):** Who require flexible, configurable inspection software that can quickly adapt to different blister grid layouts (e.g., $2 \times 5$, $2 \times 7$, $1 \times 10$) without expensive proprietary vision sensor lock-in.
+- Quality assurance inspectors and line operators who need an automated check at the packaging stage.
+- Compliance teams who need automated, timestamped digital logs of batch defect counts.
+- Small or contract packaging facilities looking for a simple, configurable inspection tool that works on standard webcams or industrial camera feeds without expensive proprietary sensor hardware.
 
-## 4. High-Level Features
-- **Deterministic Tablet Verification:** High-precision counting and missing-tablet detection with near 100% recall.
-- **Sub-Pixel Shape Integrity Analysis:** Identifies chips, cracks, and structural deformities using circularity and convex hull solidity metrics.
-- **Perceptual Color Consistency:** Detects subtle batch discoloration and cross-product contamination using CIE $L^*a^*b^*$ $\Delta E$ comparison against reference tablets.
-- **Configurable Grid Profiles:** Supports arbitrary row and column configurations via CLI flags or a structured `config.json` profile.
-- **100% Headless CLI Operation:** Runs in any terminal or headless container environment without requiring a GUI display.
-- **Automated Synthetic Dataset & Benchmark Suite:** Generates realistic packaging scenarios with ground truth annotations to validate precision, recall, and detection accuracy.
+## 4. Key Features
+- Accurate tablet counting and missing pill detection.
+- Broken and chipped tablet identification based on contour shape metrics (circularity and solidity).
+- Color deviation checks using Delta-E in CIE L*a*b* space against reference tablet samples.
+- Configurable grid layouts (like 2x5, 2x7, or custom layouts) through CLI flags or a simple config.json file.
+- Works 100% headlessly in terminals with standard exit codes (0 for pass, 1 for reject).
+- Built-in sample generator and automated benchmark suite to test precision, recall, and accuracy across realistic defect scenarios.
