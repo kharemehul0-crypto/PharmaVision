@@ -269,22 +269,27 @@
 
 <p>Visual inspection overlays are saved to <code>results/annotated_*.png</code>, highlighting each pocket status with color-coded bounding boxes and an inspection summary banner.</p>
 
-<p>#### 10.1 Visual Inspection Outputs</p>
+<p>#### 10.1 Terminal Execution &amp; Benchmark CLI Output</p>
+
+<p><div style="text-align:center; margin:20px 0;"><img src="terminal_execution_screenshot.png" alt="Terminal Execution: Automated Benchmark Suite &amp; Single Pack Audit" style="max-width:100%; border:1px solid #ddd; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.1);"><p style="font-size:0.88em; color:#586069; margin-top:6px;"><em>Figure: Terminal Execution: Automated Benchmark Suite &amp; Single Pack Audit</em></p></div></p>
+<p><em>Figure 10.1: Live terminal execution in VS Code showing the automated benchmark evaluation across all 5 test scenarios (achieving 100% accuracy, precision, and recall) followed by the single blister pack inspection audit (<code>sample_03_chipped_tablet.png</code>) with detailed per-pocket circularity, solidity, Delta-E metrics, and 23.7 ms execution latency.</em></p>
+
+<p>#### 10.2 Visual Inspection Outputs</p>
 
 <p><div style="text-align:center; margin:20px 0;"><img src="../results/annotated_sample_01_perfect_pack.png" alt="Scenario 1: Compliant Blister Pack Inspection (PASS)" style="max-width:100%; border:1px solid #ddd; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.1);"><p style="font-size:0.88em; color:#586069; margin-top:6px;"><em>Figure: Scenario 1: Compliant Blister Pack Inspection (PASS)</em></p></div></p>
-<p><em>Figure 10.1: Perfect blister pack with 10/10 intact tablets. All pockets are verified green with high circularity and pass the overall batch inspection.</em></p>
+<p><em>Figure 10.2: Perfect blister pack with 10/10 intact tablets. All pockets are verified green with high circularity and pass the overall batch inspection.</em></p>
 
 <p><div style="text-align:center; margin:20px 0;"><img src="../results/annotated_sample_02_missing_tablet.png" alt="Scenario 2: Missing Tablet Detection (REJECT)" style="max-width:100%; border:1px solid #ddd; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.1);"><p style="font-size:0.88em; color:#586069; margin-top:6px;"><em>Figure: Scenario 2: Missing Tablet Detection (REJECT)</em></p></div></p>
-<p><em>Figure 10.2: Missing tablet scenario. Empty cavities #4 and #8 are flagged with red crossed boxes and rejected.</em></p>
+<p><em>Figure 10.3: Missing tablet scenario. Empty cavities #4 and #8 are flagged with red crossed boxes and rejected.</em></p>
 
 <p><div style="text-align:center; margin:20px 0;"><img src="../results/annotated_sample_03_chipped_tablet.png" alt="Scenario 3: Chipped / Broken Tablet Detection (REJECT)" style="max-width:100%; border:1px solid #ddd; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.1);"><p style="font-size:0.88em; color:#586069; margin-top:6px;"><em>Figure: Scenario 3: Chipped / Broken Tablet Detection (REJECT)</em></p></div></p>
-<p><em>Figure 10.3: Tablet #3 suffers a physical corner fracture. The contour analyzer detects low circularity (0.635) and low solidity (0.812), flagging the tablet in orange and rejecting the pack.</em></p>
+<p><em>Figure 10.4: Tablet #3 suffers a physical corner fracture. The contour analyzer detects low circularity (0.594) and low solidity (0.889), flagging the tablet in orange and rejecting the pack.</em></p>
 
 <p><div style="text-align:center; margin:20px 0;"><img src="../results/annotated_sample_04_discolored_tablet.png" alt="Scenario 4: Foreign Tablet / Contamination Detection (REJECT)" style="max-width:100%; border:1px solid #ddd; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.1);"><p style="font-size:0.88em; color:#586069; margin-top:6px;"><em>Figure: Scenario 4: Foreign Tablet / Contamination Detection (REJECT)</em></p></div></p>
-<p><em>Figure 10.4: Tablet #7 exhibits significant color shift (CIE Delta-E = 132.5 &gt; threshold 28.0), flagged with a purple badge as discolored/foreign.</em></p>
+<p><em>Figure 10.5: Tablet #7 exhibits significant color shift (CIE Delta-E = 132.5 &gt; threshold 28.0), flagged with a purple badge as discolored/foreign.</em></p>
 
 <p><div style="text-align:center; margin:20px 0;"><img src="../results/annotated_sample_05_multi_defect.png" alt="Scenario 5: Compound Multi-Defect Pack (REJECT)" style="max-width:100%; border:1px solid #ddd; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.1);"><p style="font-size:0.88em; color:#586069; margin-top:6px;"><em>Figure: Scenario 5: Compound Multi-Defect Pack (REJECT)</em></p></div></p>
-<p><em>Figure 10.5: Complex industrial scenario containing simultaneously missing (#2), chipped (#6), and discolored (#9) defects.</em></p>
+<p><em>Figure 10.6: Complex industrial scenario containing simultaneously missing (#2), chipped (#6), and discolored (#9) defects.</em></p>
 
 <hr>
 
