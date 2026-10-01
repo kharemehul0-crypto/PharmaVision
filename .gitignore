@@ -43,3 +43,4 @@ Thumbs.db
 
 # Documentation build artifacts
 docs/
+*.pdf
