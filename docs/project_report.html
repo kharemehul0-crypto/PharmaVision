@@ -16,7 +16,8 @@
   }
   h1 { font-size: 2.2em; border-bottom: 2px solid #eaecef; padding-bottom: 0.3em; margin-top: 24px; color: #1a1f2c; }
   h2 { font-size: 1.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; margin-top: 20px; color: #2c3e50; }
-  h3 { font-size: 1.2em; margin-top: 18px; color: #34495e; }
+  h3 { font-size: 1.25em; margin-top: 18px; color: #34495e; }
+  h4 { font-size: 1.05em; margin-top: 14px; color: #2980b9; }
   p { margin: 10px 0; }
   code { font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 85%; }
   pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; font-size: 85%; }
@@ -137,12 +138,12 @@
 
 <h3>Section 7: Design Diagrams</h3>
 
-<p>#### 7.1 Use Case Diagram</p>
+<h4>7.1 Use Case Diagram</h4>
 <li><strong>QA Line Operator:</strong> Triggers batch or single image inspection from the terminal; configures tolerance thresholds via <code>config.json</code>.</li>
 <li><strong>Packaging Pipeline / CI Automation:</strong> Invokes <code>main.py</code> via shell script, monitors process exit codes, and ingests <code>report_*.json</code> output.</li>
 <li><strong>Quality Compliance Officer:</strong> Audits timestamped CSV production logs (<code>batch_inspection_log.csv</code>) and reviews annotated visual outputs.</li>
 
-<p>#### 7.2 Process Flow / Workflow Diagram</p>
+<h4>7.2 Process Flow / Workflow Diagram</h4>
 <li>Script receives CLI arguments (<code>--input</code>, <code>--output-dir</code>, <code>--config</code>, etc.).</li>
 <li>Ingest image and apply bilateral filtering ($d=9, \sigma_{\text{color}}=75, \sigma_{\text{space}}=75$).</li>
 <li>Segment blister card boundary using thresholding and morphological bounding.</li>
@@ -154,7 +155,7 @@
 <li>If all pockets are <code>NORMAL</code>, set pack status to <code>PASS</code>; otherwise set <code>REJECT</code>.</li>
 <li>Render visual HUD banner and save outputs.</li>
 
-<p>#### 7.3 UML Class Diagram</p>
+<h4>7.3 UML Class Diagram</h4>
 <li><code>PackConfig</code>: Dataclass holding grid counts, filtering coefficients, and geometric tolerances.</li>
 <li><code>ImagePreprocessor</code>: Manages image loading, bilateral filtering, CLAHE, and color space transformations.</li>
 <li><code>BlisterGridDetector</code>: Computes card boundaries and returns coordinates for each pocket.</li>
@@ -164,10 +165,10 @@
 <li><code>InspectionVisualizer</code>: Renders color-coded pocket borders, labels, and header HUD banners.</li>
 <li><code>ReportEngine</code>: Handles terminal summaries, JSON serialization, and CSV logging.</li>
 
-<p>#### 7.4 UML Sequence Diagram</p>
+<h4>7.4 UML Sequence Diagram</h4>
 <p>The sequence diagram details the function call progression from CLI invocation in <code>main.py</code> to <code>inspect_pack()</code>, contour analysis, color sampling, and file export. Complete diagram specifications are documented in <code>docs/diagrams.md</code>.</p>
 
-<p>#### 7.5 Database &amp; Storage Schema</p>
+<h4>7.5 Database &amp; Storage Schema</h4>
 <p>Inspection results are persisted to:</p>
 <li><code>results/batch_inspection_log.csv</code>: Relational audit table containing timestamp, image name, overall status, total pockets, tablets present, fill rate %, defect counts, and latency.</li>
 <li><code>results/report_&lt;image_name&gt;.json</code>: Hierarchical JSON records containing per-pocket coordinates, area, circularity, solidity, $\Delta E$, and specific defect reasons.</li>
@@ -176,16 +177,16 @@
 
 <h3>Section 8: Design Decisions &amp; Rationale</h3>
 
-<p>#### Classical Computer Vision vs. Deep Learning (CNN/YOLO)</p>
+<h4>Classical Computer Vision vs. Deep Learning (CNN/YOLO)</h4>
 <p>A deliberate architectural decision was made to use classical computer vision (morphological contour analysis and colorimetry) rather than an object detection model like YOLO or Faster R-CNN.</p>
 <li><strong>Data Efficiency:</strong> Training a neural network to detect subtle tablet edge fractures requires thousands of annotated industrial images covering every defect variant. In a pharmaceutical setting, producing thousands of broken tablet samples is expensive and impractical.</li>
 <li><strong>Deterministic Verification:</strong> Regulatory agencies require explainable inspection rules. With contour circularity ($C = 4\pi A / P^2$) and solidity ($S = A / A_{\text{hull}}$), rejection reasons are mathematically verifiable rather than black-box probability scores.</li>
 <li><strong>Execution Speed on CPU:</strong> Deep learning inference models typically require dedicated GPUs to run at real-time speeds, whereas our OpenCV pipeline executes in under 20 ms on standard commodity CPUs without GPU overhead.</li>
 
-<p>#### Color Space Selection: CIE $L^<em>a^</em>b^*$ vs. RGB</p>
+<h4>Color Space Selection: CIE $L^<em>a^</em>b^*$ vs. RGB</h4>
 <p>While RGB values are standard for image capture, Euclidean distances in RGB space do not match human perception of color differences. The CIE $L^<em>a^</em>b^<em>$ color space was selected because its dimensions ($L^</em>$ for lightness, $a^<em>$ for green-red, and $b^</em>$ for blue-yellow) are perceptually uniform. The Euclidean distance $\Delta E = \sqrt{(\Delta L)^2 + (\Delta a)^2 + (\Delta b)^2}$ provides a reliable metric for spotting foreign tablets or chemical discoloration.</p>
 
-<p>#### Handling Foil Glare and Specular Reflection</p>
+<h4>Handling Foil Glare and Specular Reflection</h4>
 <p>Metallic aluminum blister foil exhibits strong specular highlights and micro-texture grains that can mislead standard Canny edge detectors. To resolve this:</p>
 <li>We applied bilateral filtering before edge detection. Unlike Gaussian blurring which blurs both noise and edges, bilateral filtering weights pixels by both spatial proximity and radiometric similarity, preserving sharp tablet rim boundaries while flattening foil noise.</li>
 <li>We used morphological opening with an elliptical structuring element ($5 \times 5$) to eliminate small reflective noise flecks inside empty pocket cavities.</li>
@@ -258,7 +259,7 @@
 </tr>
 </tbody></table></div>
 
-<p>#### Overall Benchmark Summary Metrics</p>
+<h4>Overall Benchmark Summary Metrics</h4>
 <li><strong>Total Blister Packs Tested:</strong> 5</li>
 <li><strong>Total Pockets Evaluated:</strong> 50</li>
 <li><strong>Pocket Classification Accuracy:</strong> 100.00%</li>
@@ -269,12 +270,12 @@
 
 <p>Visual inspection overlays are saved to <code>results/annotated_*.png</code>, highlighting each pocket status with color-coded bounding boxes and an inspection summary banner.</p>
 
-<p>#### 10.1 Terminal Execution &amp; Benchmark CLI Output</p>
+<h4>10.1 Terminal Execution &amp; Benchmark CLI Output</h4>
 
 <p><div style="text-align:center; margin:20px 0;"><img src="terminal_execution_screenshot.png" alt="Terminal Execution: Automated Benchmark Suite &amp; Single Pack Audit" style="max-width:100%; border:1px solid #ddd; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.1);"><p style="font-size:0.88em; color:#586069; margin-top:6px;"><em>Figure: Terminal Execution: Automated Benchmark Suite &amp; Single Pack Audit</em></p></div></p>
 <p><em>Figure 10.1: Live terminal execution in VS Code showing the automated benchmark evaluation across all 5 test scenarios (achieving 100% accuracy, precision, and recall) followed by the single blister pack inspection audit (<code>sample_03_chipped_tablet.png</code>) with detailed per-pocket circularity, solidity, Delta-E metrics, and 23.7 ms execution latency.</em></p>
 
-<p>#### 10.2 Visual Inspection Outputs</p>
+<h4>10.2 Visual Inspection Outputs</h4>
 
 <p><div style="text-align:center; margin:20px 0;"><img src="../results/annotated_sample_01_perfect_pack.png" alt="Scenario 1: Compliant Blister Pack Inspection (PASS)" style="max-width:100%; border:1px solid #ddd; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.1);"><p style="font-size:0.88em; color:#586069; margin-top:6px;"><em>Figure: Scenario 1: Compliant Blister Pack Inspection (PASS)</em></p></div></p>
 <p><em>Figure 10.2: Perfect blister pack with 10/10 intact tablets. All pockets are verified green with high circularity and pass the overall batch inspection.</em></p>

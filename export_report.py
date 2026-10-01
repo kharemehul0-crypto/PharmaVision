@@ -13,6 +13,7 @@ def convert_markdown_to_html(md_text: str) -> str:
     text = md_text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
     # Headers
+    text = re.sub(r"^#### (.*?)$", r"<h4>\1</h4>", text, flags=re.MULTILINE)
     text = re.sub(r"^### (.*?)$", r"<h3>\1</h3>", text, flags=re.MULTILINE)
     text = re.sub(r"^## (.*?)$", r"<h2>\1</h2>", text, flags=re.MULTILINE)
     text = re.sub(r"^# (.*?)$", r"<h1>\1</h1>", text, flags=re.MULTILINE)
@@ -111,7 +112,8 @@ def main():
   }}
   h1 {{ font-size: 2.2em; border-bottom: 2px solid #eaecef; padding-bottom: 0.3em; margin-top: 24px; color: #1a1f2c; }}
   h2 {{ font-size: 1.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; margin-top: 20px; color: #2c3e50; }}
-  h3 {{ font-size: 1.2em; margin-top: 18px; color: #34495e; }}
+  h3 {{ font-size: 1.25em; margin-top: 18px; color: #34495e; }}
+  h4 {{ font-size: 1.05em; margin-top: 14px; color: #2980b9; }}
   p {{ margin: 10px 0; }}
   code {{ font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; background: #f6f8fa; padding: 0.2em 0.4em; border-radius: 3px; font-size: 85%; }}
   pre {{ background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; font-size: 85%; }}
