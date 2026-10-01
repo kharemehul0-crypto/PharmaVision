@@ -4,7 +4,7 @@ A command-line tool that checks blister packs for missing, broken and discoloure
 
 | | |
 |---|---|
-| **Author** | Mehul Khare (24BAI10613) |
+| **Author** | Mehul Khare (24BAI10631) |
 | **Course** | Computer Vision, flipped course project |
 | **Repository** | https://github.com/kharemehul0-crypto/PharmaVision |
 
