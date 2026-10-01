@@ -1,107 +1,113 @@
 # PharmaVision
 
-Automated blister pack and tablet inspection system using OpenCV and Python.
+A command-line tool that checks blister packs for missing, broken and discoloured tablets. It uses OpenCV and plain Python, with no GPU and no trained model.
 
-- **Name:** Mehul Khare
-- **Registration Number:** 24BAI10613
-- **Course:** Computer Vision (Flipped Course Project)
-- **Repository:** https://github.com/kharemehul0-crypto/PharmaVision
-
----
-
-## Overview
-
-In pharmaceutical packaging lines, tablets are placed into blister pockets and heat-sealed with aluminum backing foil at rates often exceeding 300 to 500 cards per minute. Because the line moves so rapidly, mechanical chute jams, vibration impacts, or vacuum feeder misfires can lead to:
-- Empty pockets (missing pills)
-- Cracked, broken, or chipped tablets
-- Foreign tablets or chemically discolored pills
-
-Manual inspection by line workers causes eye strain within minutes, and subtle edge chips or faint color variations easily pass through undetected. 
-
-I developed **PharmaVision** to automate this inspection using classical computer vision. Instead of needing high-end GPUs or massive labeled datasets for deep learning, PharmaVision uses geometric contour moments, bilateral filtering, and CIE L*a*b* color distance ($\Delta E$). It runs on a standard laptop CPU in roughly 20 milliseconds per pack (~50 FPS), providing deterministic, real-time quality grading with zero GPU requirements.
+| | |
+|---|---|
+| **Author** | Mehul Khare (24BAI10613) |
+| **Course** | Computer Vision, flipped course project |
+| **Repository** | https://github.com/kharemehul0-crypto/PharmaVision |
 
 ---
 
-## How It Works
+## Why I built this
 
-1. **Card Localization & Pocket Slicing:** Finds the outer contour of the blister card, trims packaging border margins, and projects a uniform $R \times C$ grid to isolate each pocket cavity as an independent region of interest.
-2. **Noise & Glare Filtering:** Shiny aluminum foil produces specular glare under overhead lighting. The pipeline uses an edge-preserving bilateral filter ($d=9, \sigma=75$) to smooth foil texture without blurring the crisp outer tablet edge, paired with CLAHE for illumination normalization.
-3. **Shape Integrity Analysis:** Segments candidate tablet contours and computes mathematical descriptors:
-   - Isoperimetric Circularity Quotient: $C = \frac{4 \pi \cdot \text{Area}}{\text{Perimeter}^2}$ (Normal tablet $\approx 0.88 - 0.95$; chipped tablet $< 0.70$)
-   - Convex Hull Solidity: $S = \frac{\text{Area}}{\text{Convex Hull Area}}$ (Normal tablet $\approx 0.98 - 1.00$; chipped tablet $< 0.90$ due to edge fracture indentations)
-4. **Perceptual Color Verification:** Erodes the tablet mask by 2 pixels to avoid sampling the metallic pocket rim, converts pixels to CIE L*a*b* space, and computes Euclidean color distance ($\Delta E$) against a reference tablet. If $\Delta E > 28.0$, the pill is flagged as discolored or foreign.
-5. **Multi-Criteria Classification:**
-   - Empty cavity $\rightarrow$ `MISSING` (Red crossed box)
-   - Area, circularity, or solidity deficit $\rightarrow$ `CHIPPED` (Orange box)
-   - Delta-E exceeds threshold $\rightarrow$ `DISCOLORED` (Purple box)
-   - All tests pass $\rightarrow$ `NORMAL` (Green box)
-6. **Reporting:** Attaches a visual HUD banner, outputs a clean ASCII summary table in the terminal, exports a machine-readable JSON log, and appends a row to a batch CSV audit trail.
+On a packaging line, tablets are dropped into blister pockets and sealed under aluminium foil at 300 to 500 cards a minute. At that speed a jammed chute, a vibration knock or a feeder misfire can leave you with:
+
+- empty pockets
+- cracked, broken or chipped tablets
+- the wrong tablet, or one that has changed colour
+
+A person watching the belt gets tired within minutes, and a small chip or a faint colour shift is easy to miss.
+
+I wanted to see how far classical computer vision could go on this problem. PharmaVision uses contour geometry, a bilateral filter and colour distance in CIE L\*a\*b\* space. It needs no labelled dataset and no GPU. On a normal laptop CPU it handles a pack in about 20 ms, which is roughly 50 packs per second. Because every decision comes from a measurable number, you can always see why a pack was rejected.
 
 ---
 
-## Installation & Setup
+## How it works
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/kharemehul0-crypto/PharmaVision.git
-   cd PharmaVision
-   ```
+The program goes through each pack in six steps.
 
-2. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-   
+**1. Find the card and cut it into pockets.**
+It locates the outline of the blister card, trims the packaging border, and lays an R x C grid over the card. Each cell is treated as its own small image.
+
+**2. Clean up the glare.**
+Shiny foil reflects overhead light and adds grainy texture. A bilateral filter (d = 9, sigma = 75) smooths that texture but keeps the sharp edge of the tablet. CLAHE then evens out the lighting.
+
+**3. Check the shape.**
+The tablet contour in each pocket is measured with two numbers:
+
+- **Circularity** = 4 x pi x Area / Perimeter². A healthy tablet scores about 0.88 to 0.95. A chipped one drops below 0.70.
+- **Solidity** = Area / Convex hull area. A healthy tablet scores about 0.98 to 1.00. A fracture leaves dents in the outline and pulls it below 0.90.
+
+**4. Check the colour.**
+The tablet mask is eroded by 2 pixels so the metal rim of the pocket is not sampled. The remaining pixels are converted to L\*a\*b\* and compared with a reference tablet. If the distance (delta-E) is above 28.0, the tablet is flagged as discoloured or foreign.
+
+**5. Decide what each pocket is.**
+
+| Finding | Label | Box colour |
+|---|---|---|
+| Empty cavity | `MISSING` | Red, crossed |
+| Area, circularity or solidity too low | `CHIPPED` | Orange |
+| Delta-E over the limit | `DISCOLORED` | Purple |
+| Everything within limits | `NORMAL` | Green |
+
+If every pocket is `NORMAL`, the pack passes. Otherwise it is rejected.
+
+**6. Write the results.**
+You get an annotated image with a summary banner, a table in the terminal, a JSON log for the pack, and a new row in a batch CSV file for auditing.
 
 ---
 
-## Usage Guide
+## Getting started
 
-All functions run through `main.py` using standard terminal flags.
+```bash
+git clone https://github.com/kharemehul0-crypto/PharmaVision.git
+cd PharmaVision
+pip install -r requirements.txt
+```
 
-### 1. Run the Automated Benchmark Suite
-Evaluates all 5 test scenarios in `dataset/samples/` against `ground_truth.json` and reports precision, recall, accuracy, and F1-score:
+Everything runs through `main.py`. No display is needed, so it also works over SSH or in a CI job.
+
+---
+
+## Usage
+
+**Run the built-in benchmark.** This checks the 5 sample scenarios in `dataset/samples/` against `ground_truth.json` and prints accuracy, precision, recall and F1.
+
 ```bash
 python main.py --benchmark
 ```
 
-### 2. Inspect a Single Blister Pack Image
+**Inspect one image:**
+
 ```bash
 python main.py --input dataset/samples/sample_03_chipped_tablet.png
 ```
 
-### 3. Batch Inspect an Entire Directory
+**Inspect a whole folder:**
+
 ```bash
 python main.py --input dataset/samples/ --output-dir results/
 ```
 
-### 4. Custom Grid Configurations
-For blister cards with different row and column layouts (e.g. 2 rows of 7 tablets):
+**Use a different card layout.** For example, 2 rows of 7 tablets:
+
 ```bash
 python main.py --input path/to/pack.jpg --expected-rows 2 --expected-cols 7
 ```
 
-### 5. Recreate Synthetic Test Dataset
-Generates fresh blister pack test images with simulated foil noise and ground truth annotations:
+**Regenerate the synthetic test images.** These come with simulated foil noise and matching ground-truth labels.
+
 ```bash
 python main.py --generate-samples
 ```
 
 ---
 
-## Running Unit Tests
+## Example output
 
-Run the full automated test suite using Python's built-in `unittest` runner:
-```bash
-python -m unittest discover -s tests -p "test_*.py" -v
-```
-All 13 unit tests pass in ~1.5s, covering bilateral filtering, CLAHE, grid pocket indexing, circularity calculations, and CLI subprocess execution.
-
----
-
-## Sample Diagnostic Terminal Output
-
-Inspecting a blister pack with a fractured tablet (`sample_03_chipped_tablet.png`):
+Here is a pack with one fractured tablet (`sample_03_chipped_tablet.png`):
 
 ```
 =================================================================
@@ -126,7 +132,44 @@ Inspecting a blister pack with a fractured tablet (`sample_03_chipped_tablet.png
 =================================================================
 ```
 
-### Exit Codes for CI/CD Integration
-- `0`: All blister packs passed quality checks (`PASS`).
-- `1`: One or more defective blister packs were detected (`REJECT`).
-- `2`: Invalid input path or image loading error.
+Pocket 3 is labelled `CHIPPED` because its circularity (0.594) is under 0.70 and its solidity (0.889) is under 0.90.
+
+---
+
+## Exit codes
+
+These make it easy to use in shell scripts and CI pipelines.
+
+| Code | Meaning |
+|---|---|
+| `0` | Every pack passed (`PASS`) |
+| `1` | At least one pack was rejected (`REJECT`) |
+| `2` | Bad input path or the image could not be loaded |
+
+```bash
+python main.py --input dataset/samples/ || echo "Something was rejected"
+```
+
+---
+
+## Tests
+
+```bash
+python -m unittest discover -s tests -p "test_*.py" -v
+```
+
+All 13 tests pass in about 1.5 seconds. They cover bilateral filtering, CLAHE, pocket indexing in the grid, circularity maths and running the CLI as a subprocess.
+
+---
+
+## Known limits
+
+- The benchmark images are synthetic, so the 100% scores show the logic works but do not predict results on a real line.
+- The grid assumes a flat, front-on photo. A tilted card will throw off the pocket positions.
+- Thresholds (circularity, solidity, delta-E 28.0) were tuned on the sample set and should be re-tuned for a new tablet type or lighting setup.
+
+## Ideas for later
+
+- Correct tilted cards with a four-point homography.
+- Check the foil seal for tiny cracks using texture features.
+- Trigger a reject arm through GPIO or Modbus.
