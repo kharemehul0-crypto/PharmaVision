@@ -94,45 +94,16 @@
 <hr>
 
 <h3>Section 6: System Architecture</h3>
-<p>PharmaCount-CV uses a sequential pipeline architecture. Each stage transforms the visual data and forwards structured dataclasses to the next module:</p>
+<p>PharmaCount-CV uses a sequential pipeline architecture divided into five discrete functional stages. Each stage processes visual features and passes structured dataclasses downstream to maintain high maintainability and testability:</p>
 
-<p><code></code>`</p>
-<p>[Raw Image / Directory] </p>
-<p>          │</p>
-<p>          ▼</p>
-<p>┌─────────────────────────────────┐</p>
-<p>│       ImagePreprocessor         │  --&gt; Denoising (Bilateral) &amp; CLAHE Equalization</p>
-<p>└─────────────────────────────────┘</p>
-<p>          │</p>
-<p>          ▼</p>
-<p>┌─────────────────────────────────┐</p>
-<p>│      BlisterGridDetector        │  --&gt; Card Bounding &amp; R x C Pocket Lattice Slicing</p>
-<p>└─────────────────────────────────┘</p>
-<p>          │</p>
-<p>    [Pocket ROIs]</p>
-<p>          │</p>
-<p>    ┌─────┴───────────────────────┐</p>
-<p>    ▼                             ▼</p>
-<p>┌─────────────────────────┐  ┌─────────────────────────┐</p>
-<p>│  TabletContourAnalyzer  │  │  TabletColorInspector   │</p>
-<p>│  (Circularity/Solidity) │  │  (CIE Lab Delta-E)       │</p>
-<p>└─────────────────────────┘  └─────────────────────────┘</p>
-<p>    │                             │</p>
-<p>    └──────────────┬──────────────┘</p>
-<p>                   ▼</p>
-<p>┌─────────────────────────────────┐</p>
-<p>│     TabletDefectClassifier      │  --&gt; Multi-Criteria Decision (NORMAL/MISSING/CHIPPED/DISCOLORED)</p>
-<p>└─────────────────────────────────┘</p>
-<p>                   │</p>
-<p>    [InspectionResult Dataclass]</p>
-<p>                   │</p>
-<p>    ┌──────────────┴──────────────┐</p>
-<p>    ▼                             ▼</p>
-<p>┌─────────────────────────┐  ┌─────────────────────────┐</p>
-<p>│   InspectionVisualizer  │  │      ReportEngine       │</p>
-<p>│  (HUD &amp; Bounding Boxes) │  │  (JSON, CSV &amp; Terminal) │</p>
-<p>└─────────────────────────┘  └─────────────────────────┘</p>
-<p><code></code>`</p>
+<p><div style="text-align:center; margin:20px 0;"><img src="system_architecture.png" alt="PharmaCount-CV Modular System Architecture Diagram" style="max-width:100%; border:1px solid #ddd; border-radius:6px; box-shadow:0 2px 6px rgba(0,0,0,0.1);"><p style="font-size:0.88em; color:#586069; margin-top:6px;"><em>Figure: PharmaCount-CV Modular System Architecture Diagram</em></p></div></p>
+<p><em>Figure 6.1: End-to-end system architecture showing the 5 sequential pipeline stages: Image Ingestion &amp; Preprocessing, Spatial Lattice Slicing, Feature Extraction, Multi-Criteria Defect Classification, and Presentation &amp; Audit Logging.</em></p>
+
+<li><strong>Stage 1 (Ingestion &amp; Preprocessing):</strong> Handles image loading, edge-preserving bilateral filtering ($d=9, \sigma=75$), CLAHE adaptive histogram equalization, and conversions to grayscale, HSV, and CIE $L^<em>a^</em>b^*$ spaces.</li>
+<li><strong>Stage 2 (Spatial Lattice Slicing):</strong> Localizes the blister card boundary, crops packaging margins, and projects a uniform $R \times C$ lattice to isolate individual pocket ROIs.</li>
+<li><strong>Stage 3 (Feature Extraction):</strong> Segments candidate tablet contours via Otsu thresholding and morphological opening, measuring circularity ($4\pi A / P^2$), convex hull solidity ($A / A_{\text{hull}}$), and CIE $L^<em>a^</em>b^*$ Euclidean color distance ($\Delta E$).</li>
+<li><strong>Stage 4 (Multi-Criteria Defect Decision):</strong> Compares pocket metrics against baseline thresholds to classify each pocket into <code>NORMAL</code>, <code>MISSING</code>, <code>CHIPPED</code>, or <code>DISCOLORED</code>, and computes the batch status (<code>PASS</code> or <code>REJECT</code>).</li>
+<li><strong>Stage 5 (Presentation &amp; Audit Logging):</strong> Generates annotated visual HUD overlays, formatted terminal ASCII tables, machine-readable JSON logs, and production CSV records.</li>
 
 <hr>
 

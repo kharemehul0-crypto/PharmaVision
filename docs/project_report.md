@@ -55,45 +55,16 @@ To design, implement, and validate an automated, non-contact computer vision sys
 ---
 
 ### Section 6: System Architecture
-PharmaCount-CV uses a sequential pipeline architecture. Each stage transforms the visual data and forwards structured dataclasses to the next module:
+PharmaCount-CV uses a sequential pipeline architecture divided into five discrete functional stages. Each stage processes visual features and passes structured dataclasses downstream to maintain high maintainability and testability:
 
-```
-[Raw Image / Directory] 
-          │
-          ▼
-┌─────────────────────────────────┐
-│       ImagePreprocessor         │  --> Denoising (Bilateral) & CLAHE Equalization
-└─────────────────────────────────┘
-          │
-          ▼
-┌─────────────────────────────────┐
-│      BlisterGridDetector        │  --> Card Bounding & R x C Pocket Lattice Slicing
-└─────────────────────────────────┘
-          │
-    [Pocket ROIs]
-          │
-    ┌─────┴───────────────────────┐
-    ▼                             ▼
-┌─────────────────────────┐  ┌─────────────────────────┐
-│  TabletContourAnalyzer  │  │  TabletColorInspector   │
-│  (Circularity/Solidity) │  │  (CIE Lab Delta-E)       │
-└─────────────────────────┘  └─────────────────────────┘
-    │                             │
-    └──────────────┬──────────────┘
-                   ▼
-┌─────────────────────────────────┐
-│     TabletDefectClassifier      │  --> Multi-Criteria Decision (NORMAL/MISSING/CHIPPED/DISCOLORED)
-└─────────────────────────────────┘
-                   │
-    [InspectionResult Dataclass]
-                   │
-    ┌──────────────┴──────────────┐
-    ▼                             ▼
-┌─────────────────────────┐  ┌─────────────────────────┐
-│   InspectionVisualizer  │  │      ReportEngine       │
-│  (HUD & Bounding Boxes) │  │  (JSON, CSV & Terminal) │
-└─────────────────────────┘  └─────────────────────────┘
-```
+![PharmaCount-CV Modular System Architecture Diagram](system_architecture.png)
+*Figure 6.1: End-to-end system architecture showing the 5 sequential pipeline stages: Image Ingestion & Preprocessing, Spatial Lattice Slicing, Feature Extraction, Multi-Criteria Defect Classification, and Presentation & Audit Logging.*
+
+1. **Stage 1 (Ingestion & Preprocessing):** Handles image loading, edge-preserving bilateral filtering ($d=9, \sigma=75$), CLAHE adaptive histogram equalization, and conversions to grayscale, HSV, and CIE $L^*a^*b^*$ spaces.
+2. **Stage 2 (Spatial Lattice Slicing):** Localizes the blister card boundary, crops packaging margins, and projects a uniform $R \times C$ lattice to isolate individual pocket ROIs.
+3. **Stage 3 (Feature Extraction):** Segments candidate tablet contours via Otsu thresholding and morphological opening, measuring circularity ($4\pi A / P^2$), convex hull solidity ($A / A_{\text{hull}}$), and CIE $L^*a^*b^*$ Euclidean color distance ($\Delta E$).
+4. **Stage 4 (Multi-Criteria Defect Decision):** Compares pocket metrics against baseline thresholds to classify each pocket into `NORMAL`, `MISSING`, `CHIPPED`, or `DISCOLORED`, and computes the batch status (`PASS` or `REJECT`).
+5. **Stage 5 (Presentation & Audit Logging):** Generates annotated visual HUD overlays, formatted terminal ASCII tables, machine-readable JSON logs, and production CSV records.
 
 ---
 
