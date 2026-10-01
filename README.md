@@ -67,12 +67,6 @@ PharmaCount-CV/
 │   ├── test_contour_analyzer.py
 │   ├── test_defect_classifier.py
 │   └── test_cli_pipeline.py
-├── docs/
-│   ├── project_report.md           # 15-section project report
-│   ├── project_report.html         # Formatted HTML report (for PDF printing)
-│   ├── diagrams.md                 # System architecture and UML diagrams
-│   ├── system_architecture.png     # Pipeline architecture diagram
-│   └── terminal_execution_screenshot.png # Terminal execution screenshot
 └── results/                        # Output folder for annotated images and logs
 ```
 
