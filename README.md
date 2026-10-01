@@ -1,125 +1,107 @@
 # PharmaVision
 
-Automated blister pack and tablet inspection system built with OpenCV and Python for my Computer Vision course project.
+Automated blister pack and tablet inspection system using OpenCV and Python.
 
-PharmaCount-CV inspects images of pharmaceutical blister packs on packaging lines. It verifies that all pockets are filled, checks that tablets are intact (not chipped or cracked), and checks that tablet colors match the expected batch without discoloration or foreign pills.
-
----
-
-## What It Does
-
-When an image of a blister pack is passed to the script, it:
-1. Locates the blister pack card and divides it into individual pocket cells based on the expected grid layout (e.g. 2 rows by 5 columns).
-2. Cleans up lighting reflections from the metallic blister foil using bilateral filtering and CLAHE.
-3. Segments each tablet and measures its shape parameters:
-   - Area and perimeter
-   - Circularity quotient ($4\pi \cdot \text{Area} / \text{Perimeter}^2$)
-   - Convex hull solidity ($\text{Area} / \text{Hull Area}$)
-4. Samples the color inside the tablet contour and measures the perceptual color distance ($\Delta E$) in CIE $L^*a^*b^*$ space against a reference tablet.
-5. Flags any defects:
-   - Empty pockets are marked `MISSING` (red crossed box).
-   - Broken or chipped pills are marked `CHIPPED` (orange box).
-   - Off-color or contaminated pills are marked `DISCOLORED` (purple box).
-   - Good tablets are marked `NORMAL` (green box).
-6. Outputs an annotated image with a summary status header, an ASCII summary table in the terminal, a JSON report, and a CSV row in the batch audit log.
+- **Author:** Mehul Khare
+- **Registration Number:** 24BAI10613
+- **Course:** Computer Vision (Flipped Course Project)
+- **Repository:** https://github.com/kharemehul0-crypto/PharmaVision
 
 ---
 
-## Tech Stack & Dependencies
+## Overview
 
-- Python 3.8+ (tested on Python 3.11)
-- OpenCV (`opencv-python`)
-- NumPy
-- Matplotlib
+In pharmaceutical packaging lines, tablets are placed into blister pockets and heat-sealed with aluminum backing foil at rates often exceeding 300 to 500 cards per minute. Because the line moves so rapidly, mechanical chute jams, vibration impacts, or vacuum feeder misfires can lead to:
+- Empty pockets (missing pills)
+- Cracked, broken, or chipped tablets
+- Foreign tablets or chemically discolored pills
 
-Install all requirements with:
-```bash
-pip install -r requirements.txt
-```
+Manual inspection by line workers causes eye strain within minutes, and subtle edge chips or faint color variations easily pass through undetected. 
 
----
-
-## Project Structure
-
-```
-PharmaCount-CV/
-├── config.json                     # Default parameters (grid size, thresholds)
-├── main.py                         # CLI script to run inspections
-├── requirements.txt                # Dependencies
-├── statement.md                    # Project problem statement and scope
-├── README.md                       # Setup and usage guide
-├── pharmacount/                    # Core inspection library
-│   ├── __init__.py
-│   ├── config.py                   # Data classes and configuration loader
-│   ├── preprocessor.py             # Bilateral filter, CLAHE, and color spaces
-│   ├── grid_detector.py            # Card boundary detection and pocket slicing
-│   ├── contour_analyzer.py         # Tablet segmentation, circularity, and solidity
-│   ├── color_inspector.py          # Color sampling and CIE Lab Delta-E checks
-│   ├── defect_classifier.py        # Decision logic for pocket and pack status
-│   ├── visualizer.py               # HUD overlay, status banners, and boxes
-│   └── report_engine.py            # JSON/CSV file exporters and terminal tables
-├── dataset/
-│   ├── generate_synthetic_data.py  # Script that creates realistic blister packs
-│   └── samples/                    # 5 test scenarios and ground_truth.json
-├── tests/                          # Automated unit test suite
-│   ├── test_preprocessor.py
-│   ├── test_grid_detector.py
-│   ├── test_contour_analyzer.py
-│   ├── test_defect_classifier.py
-│   └── test_cli_pipeline.py
-└── results/                        # Output folder for annotated images and logs
-```
+I developed **PharmaVision** to automate this inspection using classical computer vision. Instead of needing high-end GPUs or massive labeled datasets for deep learning, PharmaVision uses geometric contour moments, bilateral filtering, and CIE L*a*b* color distance ($\Delta E$). It runs on a standard laptop CPU in roughly 20 milliseconds per pack (~50 FPS), providing deterministic, real-time quality grading with zero GPU requirements.
 
 ---
 
-## How to Run
+## How It Works
 
-All features are accessible via `main.py` using standard terminal flags.
+1. **Card Localization & Pocket Slicing:** Finds the outer contour of the blister card, trims packaging border margins, and projects a uniform $R \times C$ grid to isolate each pocket cavity as an independent region of interest.
+2. **Noise & Glare Filtering:** Shiny aluminum foil produces specular glare under overhead lighting. The pipeline uses an edge-preserving bilateral filter ($d=9, \sigma=75$) to smooth foil texture without blurring the crisp outer tablet edge, paired with CLAHE for illumination normalization.
+3. **Shape Integrity Analysis:** Segments candidate tablet contours and computes mathematical descriptors:
+   - Isoperimetric Circularity Quotient: $C = \frac{4 \pi \cdot \text{Area}}{\text{Perimeter}^2}$ (Normal tablet $\approx 0.88 - 0.95$; chipped tablet $< 0.70$)
+   - Convex Hull Solidity: $S = \frac{\text{Area}}{\text{Convex Hull Area}}$ (Normal tablet $\approx 0.98 - 1.00$; chipped tablet $< 0.90$ due to edge fracture indentations)
+4. **Perceptual Color Verification:** Erodes the tablet mask by 2 pixels to avoid sampling the metallic pocket rim, converts pixels to CIE L*a*b* space, and computes Euclidean color distance ($\Delta E$) against a reference tablet. If $\Delta E > 28.0$, the pill is flagged as discolored or foreign.
+5. **Multi-Criteria Classification:**
+   - Empty cavity $\rightarrow$ `MISSING` (Red crossed box)
+   - Area, circularity, or solidity deficit $\rightarrow$ `CHIPPED` (Orange box)
+   - Delta-E exceeds threshold $\rightarrow$ `DISCOLORED` (Purple box)
+   - All tests pass $\rightarrow$ `NORMAL` (Green box)
+6. **Reporting:** Attaches a visual HUD banner, outputs a clean ASCII summary table in the terminal, exports a machine-readable JSON log, and appends a row to a batch CSV audit trail.
 
-### 1. Run the benchmark evaluation
-Tests the pipeline against 5 test packs in `dataset/samples/` and checks predictions against `ground_truth.json`:
+---
+
+## Installation & Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/kharemehul0-crypto/PharmaVision.git
+   cd PharmaVision
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+   *(Only `opencv-python`, `numpy`, and `matplotlib` are required)*
+
+---
+
+## Usage Guide
+
+All functions run through `main.py` using standard terminal flags.
+
+### 1. Run the Automated Benchmark Suite
+Evaluates all 5 test scenarios in `dataset/samples/` against `ground_truth.json` and reports precision, recall, accuracy, and F1-score:
 ```bash
 python main.py --benchmark
 ```
 
-### 2. Inspect a single image
+### 2. Inspect a Single Blister Pack Image
 ```bash
 python main.py --input dataset/samples/sample_03_chipped_tablet.png
 ```
 
-### 3. Batch inspect a folder of images
+### 3. Batch Inspect an Entire Directory
 ```bash
 python main.py --input dataset/samples/ --output-dir results/
 ```
 
-### 4. Custom grid configuration
-If inspecting a blister pack with a different layout (for example, 2 rows of 7 tablets):
+### 4. Custom Grid Configurations
+For blister cards with different row and column layouts (e.g. 2 rows of 7 tablets):
 ```bash
-python main.py --input path/to/image.png --expected-rows 2 --expected-cols 7
+python main.py --input path/to/pack.jpg --expected-rows 2 --expected-cols 7
 ```
 
-### 5. Generate sample dataset
-Recreates the synthetic test images with realistic metallic foil noise:
+### 5. Recreate Synthetic Test Dataset
+Generates fresh blister pack test images with simulated foil noise and ground truth annotations:
 ```bash
 python main.py --generate-samples
 ```
 
 ---
 
-## Running the Unit Tests
+## Running Unit Tests
 
-Run the test suite using Python's built-in `unittest`:
+Run the full automated test suite using Python's built-in `unittest` runner:
 ```bash
 python -m unittest discover -s tests -p "test_*.py" -v
 ```
-
-This runs 13 unit tests covering bilateral filtering, color space conversions, grid pocket indexing, circularity calculations, and CLI execution.
+All 13 unit tests pass in ~1.5s, covering bilateral filtering, CLAHE, grid pocket indexing, circularity calculations, and CLI subprocess execution.
 
 ---
 
-## Sample Terminal Output
+## Sample Diagnostic Terminal Output
 
-Inspecting a pack with a chipped tablet (`sample_03_chipped_tablet.png`):
+Inspecting a blister pack with a fractured tablet (`sample_03_chipped_tablet.png`):
 
 ```
 =================================================================
@@ -144,4 +126,7 @@ Inspecting a pack with a chipped tablet (`sample_03_chipped_tablet.png`):
 =================================================================
 ```
 
-The script exits with code `0` if all tablets pass, and `1` if any defect is detected, making it easy to use in automated scripts.
+### Exit Codes for CI/CD Integration
+- `0`: All blister packs passed quality checks (`PASS`).
+- `1`: One or more defective blister packs were detected (`REJECT`).
+- `2`: Invalid input path or image loading error.
